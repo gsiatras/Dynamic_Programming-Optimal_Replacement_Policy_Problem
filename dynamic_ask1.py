@@ -40,8 +40,15 @@ class Agent:
                         self.dec[k, j] = 0
         print(self.V)
         print(self.dec)
-        print(self.u)
 
+        j = 0
+        for i in range(0, self.K-1):
+            if self.dec[i, j] == 0:
+                j += 1
+            else:
+                j = 0
+            self.u[i + 1] = self.dec[i + 1, j]
+        print(self.u)
 
 
 def menu():
