@@ -48,6 +48,7 @@ class Agent:
             else:
                 j = 0
             self.u[i + 1] = self.dec[i + 1, j]
+        print('Path:')
         print(self.u)
 
 
