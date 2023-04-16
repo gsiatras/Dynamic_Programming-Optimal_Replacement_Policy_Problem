@@ -1,105 +1,64 @@
 import numpy as np
 
-class GraphAgent:
-    def __init__(self, c, stages, nodes):
-        self.stages = stages
-        self.nodes = nodes
-        self.ci = c
+class Agent:
+    def __init__(self, K, X, T):
+        self.K = K
+        self.X = X
+        self.T = T
+        self.x = np.ones(K + 1)
+        self.V = np.zeros((K+1, X+1))
+        self.dec = np.zeros((K+1, X+1))
+        self.u = np.zeros(K)
 
-        self.d = [[0 for k in range(self.nodes[j])] for j in range(self.stages)]
-        self.cost = [[0 for k in range(self.nodes[j])] for j in range(self.stages)]
-        self.path = [0 for j in range(self.stages)]
-        # print(self.cost)
+    def cost(self, k, x):
+        return np.exp(-x)
+    def phi2(self, x , k):
+        return x**2
+    def phi1(self, x, k):
+        return self.T*np.sqrt(k) - self.cost(k, x)
 
-    def printer(self):
-        print('============================Graph===============================')
-        self.print_graph()
-        print('================================================================')
-        print('------------------Path and cost for every node------------------')
-        # print path and cost for every node
-        print('Current: \t\t\t To: \nStage:\tNode:\t\tStage:\tNodes:\tCost to end:')
-        for i in range(self.stages - 1):
-            for j in range(int(self.nodes[i])):
-                print(' %d\t\t %d\t\t\t %d\t\t %d\t\t %d' % (i, j, i + 1, self.d[i][j], self.cost[i][j]))
-        print('================================================================')
-        print('------------------Shortest Path and cost to end-----------------')
-        for k in range(self.stages):
-            if k == self.stages - 1:
-                print('(%d, %d)' % (k, self.path[k]))
-            else:
-                print('(%d, %d) =>'  % (k, self.path[k]))
-        print('Total cost: %d' % self.cost[0][0])
 
     #  function to calculate sortest path
     def calculate(self):
-        for i in range(self.stages - 2, -1, -1):
-            for j in range(self.nodes[i]):
-                min = 1000
-                for k in range(int(self.nodes[i+1])):
-                    # print('%d || %d || %d' %( i,j, k))
-                    if c[i][j][k] + self.cost[i+1][k] < min:
-                        min = c[i][j][k] + self.cost[i+1][k]
-                        self.d[i][j] = k
-                self.cost[i][j] = min
-        # find sortest path
-        self.path[0] = 0
-        for i in range(1, self.stages):
-            self.path[i] = self.d[i-1][self.path[i-1]]
-        # print(self.d)
-        # print results
-        self.printer()
-        # print(self.path)
+        for k in range(self.K-1, -1, -1):
+            for j in range(1, min(self.X, k+1)):
+                if j == self.X:
+                    theta = self.cost(j, k)
+                else:
+                    theta = 0
+                Vkeep = self.phi2(j, k) + self.V[k+1, j+1]
+                Vreplace = self.phi1(j, k) + self.V[k+1, 1]
+                if Vkeep < Vreplace:
+                    self.V[k,j] = Vkeep
+                    self.dec[k,j] = 0
+                else:
+                    self.V[k,j] = Vreplace
+                    self.dec[k,j] = 1
+            # Vmin = np.argmin(self.V[:, k])
+            # self.u[k] = self.dec[Vmin, k]
+        print(self.u)
+        # for i in range(0, self.K-1):
+        #     if self.u[i] == 0:
+        #         self.u[i+1] = self.dec[i+1][i+1]
+        #     else:
+        #         self.u[i+1] = self.dec[i+1, 1]
+        print(self.V)
+        print(self.dec)
+        print(self.u)
 
-    def print_graph(self):
-        print('Current: \t\t\t To: \nStage:\t Node:\t\t Stage:\t Node:\t Cost:')
-        for i in range(self.stages - 1):
-            for j in range(int(self.nodes[i])):
-                for k in range(int(self.nodes[i + 1])):
-                    if self.ci[i][j][k] < 1000:
-                        print('%d\t\t %d\t\t\t %d\t\t %d\t\t %d' % (i, j, i + 1, k, self.ci[i][j][k]))
+
 
 def menu():
-    stages = int(input('Stages: \n'))
-    nodes = []
-    nodes.append(1)
-    c = []
-
-    for i in range(1, stages):
-        nodes.append(int(input('Nodes for stage %d:' % i)))
-    for i in range(stages - 1):
-        cost = []
-        for j in range(int(nodes[i])):
-            node_cost = []
-            for k in range(int(nodes[i+1])):
-                node_cost.append(int(input('Cost from Stage %d Node %d to Stage %d Node %d:' % (i, j, i + 1, k))))
-            cost.append(node_cost)
-        c.append(cost)
-    return c, stages, nodes
+    K = int(input('Time Horizon :'))
+    X = int(input('Maximum age of machine :'))
+    T = int(input('Cost of the machine'))
+    return K, X, T
 
 
 
 if __name__ == '__main__':
-    # c, stages, nodes= menu()
-    # test graph1
-    # c = [[[2, 3]], [[5, 1, 1000], [1000, 1000, 3]], [[6, 1000], [3, 2], [1000, 4]]]
-    # stages = 4
-    # nodes = [1, 2, 3, 2]
-    # ipnut graph
-    stages = 7
-    nodes = [1, 3, 3, 3, 4, 3, 2]
-    c =[[[5, 7, 4]],
-        [[2, 1000, 1000], [1000, 3, 4], [6, 7, 5]],
-        [[7, 2, 1000], [3, 1, 2], [1000, 4, 2]],
-        [[4, 2, 1000, 6], [1000, 3, 1000, 1000], [5, 1000, 2, 4]],
-        [[5, 1000, 4], [1000, 6, 1000], [1000, 3, 1000], [1000, 1000, 3]],
-        [[7, 4], [8, 5], [6, 7]]]
-    agent = GraphAgent(c, stages, nodes)
-    agent.calculate()
-
-    while True:
-        print('============================New graph===========================')
-        c, stages, nodes = menu()
-        agent = GraphAgent(c, stages, nodes)
+        # K, X, T = menu()
+        agent = Agent(5, 4, 10)
         agent.calculate()
 
 
