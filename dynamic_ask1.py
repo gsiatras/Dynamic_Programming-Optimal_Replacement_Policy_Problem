@@ -20,28 +20,24 @@ class Agent:
 
     #  function to calculate sortest path
     def calculate(self):
-        for k in range(self.K-1, -1, -1):
-            for j in range(1, min(self.X, k+1)):
+        for k in range(self.K - 1, -1, -1):
+            for j in range(1, min(self.X, k) + 1):
                 if j == self.X:
                     theta = self.cost(j, k)
+                    Vkeep = self.phi2(j, k)
+                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1]
+                    self.V[k, j] = min(Vkeep, Vreplace)
+                    self.dec[k, j] = int(Vreplace < Vkeep)
                 else:
                     theta = 0
-                Vkeep = self.phi2(j, k) + self.V[k+1, j+1]
-                Vreplace = self.phi1(j, k) + self.V[k+1, 1]
-                if Vkeep < Vreplace:
-                    self.V[k,j] = Vkeep
-                    self.dec[k,j] = 0
-                else:
-                    self.V[k,j] = Vreplace
-                    self.dec[k,j] = 1
-            # Vmin = np.argmin(self.V[:, k])
-            # self.u[k] = self.dec[Vmin, k]
-        print(self.u)
-        # for i in range(0, self.K-1):
-        #     if self.u[i] == 0:
-        #         self.u[i+1] = self.dec[i+1][i+1]
-        #     else:
-        #         self.u[i+1] = self.dec[i+1, 1]
+                    Vkeep = self.phi2(j, k) + self.V[k + 1, j + 1]
+                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1]
+                    if j >= self.X -1 or Vreplace < Vkeep:
+                        self.V[k, j] = Vreplace
+                        self.dec[k, j] = 1
+                    else:
+                        self.V[k, j] = Vkeep
+                        self.dec[k, j] = 0
         print(self.V)
         print(self.dec)
         print(self.u)
