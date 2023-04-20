@@ -38,7 +38,7 @@ class Agent:
                     else:
                         self.V[k, j] = Vkeep
                         self.dec[k, j] = 0
-        # print(self.V)
+
         # print(self.dec)
 
         # calculate the optimal decisions
