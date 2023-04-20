@@ -11,27 +11,27 @@ class Agent:
         self.u = np.zeros(K)             # array to store optimal decisions
         self.c = np.zeros(K)          # array to store optimal costs
 
-    def cost(self, k, x):
+    def cost(self, x, k):
         return np.exp(-x)
     def phi2(self, x , k):
         return x**2
     def phi1(self, x, k):
-        return self.T*np.sqrt(k) - self.cost(k, x)
+        return self.T*np.sqrt(k) - self.cost(x, k)
 
     # function to calculate optimal policy
     def calculate(self):
         for k in range(self.K - 1, -1, -1):                         # iterate backwards for each time stem in K
             for j in range(1, min(self.X, k) + 1):                  # iterate through all the possible ages at time k
                 if j == self.X:                                     # if we reach max age add the theta factor
-                    theta = self.cost(j, k)
+                    theta = -self.cost(j, k)
                     Vkeep = self.phi2(j, k)
-                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1]
+                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1] + self.phi2(j, k)
                     self.V[k, j] = min(Vkeep, Vreplace)
                     self.dec[k, j] = int(Vreplace < Vkeep)
                 else:
                     theta = 0
                     Vkeep = self.phi2(j, k) + self.V[k + 1, j + 1]  # choose between Vreplace and Vkeep
-                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1]
+                    Vreplace = self.phi1(j, k) + self.V[k + 1, 1] + self.phi2(j, k)
                     if j >= self.X - 1 or Vreplace < Vkeep:
                         self.V[k, j] = Vreplace
                         self.dec[k, j] = 1
